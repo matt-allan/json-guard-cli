@@ -43,26 +43,30 @@ function normalize_json_argument($json)
     return \League\JsonGuard\json_decode($json, false, 512, JSON_BIGINT_AS_STRING);
 }
 
+function render_error_table($errors)
+{
+    (new Table($output))
+        ->setHeaders(['Code', 'Message', 'Pointer', 'Value', 'Constraints'])
+        ->setRows(printable_errors($errors))
+        ->render();
+}
+
 $app = new Application('JSON Guard CLI', '0.0.1');
 
 $app->command('validate [data] [schema]', function ($data, $schema, $output) {
     if (!preg_match('#^.+\:\/\/.*#', $schema)) {
         $schema = normalize_json_argument($argument);
     }
+
     $schema    = (new Dereferencer())->dereference($schema);
     $validator = new Validator(normalize_json_argument($data), $schema);
 
     if ($validator->passes()) {
         $output->writeln('<info>✓ Validation passed</info>');
-        return;
+    } else {
+        $output->writeln('<error>✗ Validation failed</error>');
+        render_error_table($validator->errors());
     }
-
-    $output->writeln('<error>✗ Validation failed</error>');
-
-    (new Table($output))
-        ->setHeaders(['Code', 'Message', 'Pointer', 'Value', 'Constraints'])
-        ->setRows(printable_errors($validator->errors()))
-        ->render();
 })->descriptions('Validate JSON data against a schema', [
     'data' => 'The data to validate.  Must be the path to a JSON file or a JSON string.',
     'schema' => 'The schema to use.  Must be the path to a JSON file, a JSON string, or a loadable path.'
@@ -74,16 +78,11 @@ $app->command('check [schema]', function ($schema, $output) {
     $validator  = new Validator(normalize_json_argument($schema), $metaSchema);
 
     if ($validator->passes()) {
-        $output->writeln('<info>✓ Valid JSON Schema draft-04</info>');
-        return;
+        $output->writeln('<info>✓ Valid draft-04 JSON Schema</info>');
+    } else {
+        $output->writeln('<error>✗ Invalid draft-04 JSON Schema</error>');
+        render_error_table($validator->errors());
     }
-
-    $output->writeln('<error>✗ Invalid JSON Schema draft-04</error>');
-
-    (new Table($output))
-        ->setHeaders(['Code', 'Message', 'Pointer', 'Value', 'Constraints'])
-        ->setRows(printable_errors($validator->errors()))
-        ->render();
 })->descriptions('Check that a JSON Schema is valid.', [
     'schema' => 'The schema to check.  Must be the path to a JSON file or a JSON string.'
 ]);
