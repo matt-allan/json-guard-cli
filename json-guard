@@ -1,0 +1,91 @@
+#!/usr/bin/env php
+<?php
+
+namespace Yuloh\JsonGuardCli;
+
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require __DIR__ . '/vendor/autoload.php';
+} else {
+    require __DIR__ . '/../../autoload.php';
+}
+
+use Silly\Application;
+use Symfony\Component\Console\Helper\Table;
+use function League\JsonGuard\asString;
+use League\JsonGuard\Dereferencer;
+use League\JsonGuard\Validator;
+use Seld\JsonLint\JsonParser;
+
+function printable_errors(array $errors) {
+    return array_map(function ($error) {
+        $error = $error->toArray();
+        $error['constraints'] = implode(
+            ',',
+            array_map(function ($k, $v) {
+                return $k . ':' . asString($v);
+            }, array_keys($error['constraints']), $error['constraints'])
+        );
+        $error['value'] = asString($error['value']);
+        return array_values($error);
+    }, $errors);
+}
+
+function normalize_json_argument($json)
+{
+    if (file_exists($json)) {
+        $json = file_get_contents($json);
+    }
+
+    if ($parseException = (new JsonParser())->lint($json)) {
+        throw $parseException;
+    }
+
+    return \League\JsonGuard\json_decode($json, false, 512, JSON_BIGINT_AS_STRING);
+}
+
+$app = new Application('JSON Guard CLI', '0.0.1');
+
+$app->command('validate [data] [schema]', function ($data, $schema, $output) {
+    if (!preg_match('#^.+\:\/\/.*#', $schema)) {
+        $schema = normalize_json_argument($argument);
+    }
+    $schema    = (new Dereferencer())->dereference($schema);
+    $validator = new Validator(normalize_json_argument($data), $schema);
+
+    if ($validator->passes()) {
+        $output->writeln('<info>✓ Validation passed</info>');
+        return;
+    }
+
+    $output->writeln('<error>✗ Validation failed</error>');
+
+    (new Table($output))
+        ->setHeaders(['Code', 'Message', 'Pointer', 'Value', 'Constraints'])
+        ->setRows(printable_errors($validator->errors()))
+        ->render();
+})->descriptions('Validate JSON data against a schema', [
+    'data' => 'The data to validate.  Must be the path to a JSON file or a JSON string.',
+    'schema' => 'The schema to use.  Must be the path to a JSON file, a JSON string, or a loadable path.'
+]);
+
+$app->command('check [schema]', function ($schema, $output) {
+    $metaSchema = (new Dereferencer())
+        ->dereference('http://json-schema.org/draft-04/schema#');
+    $validator  = new Validator(normalize_json_argument($schema), $metaSchema);
+
+    if ($validator->passes()) {
+        $output->writeln('<info>✓ Valid JSON Schema draft-04</info>');
+        return;
+    }
+
+    $output->writeln('<error>✗ Invalid JSON Schema draft-04</error>');
+
+    (new Table($output))
+        ->setHeaders(['Code', 'Message', 'Pointer', 'Value', 'Constraints'])
+        ->setRows(printable_errors($validator->errors()))
+        ->render();
+})->descriptions('Check that a JSON Schema is valid.', [
+    'schema' => 'The schema to check.  Must be the path to a JSON file or a JSON string.'
+]);
+
+$app->run();

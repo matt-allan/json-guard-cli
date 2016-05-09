@@ -1,0 +1,14 @@
+{
+    "id": "json-guard.dev/schema#",
+    "properties": {
+        "product": {
+            "type": "object",
+            "maxLength": -4
+        },
+        "cost": {
+            "type": "string",
+            "pattern": 123
+        },
+        "additionalProperties": []
+    }
+}
