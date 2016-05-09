@@ -7,17 +7,76 @@
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
+This package is a CLI client for [JSON Guard](json-guard.thephpleague.com), a JSON Schema validator.  You can easily validate data against a schema or check your schema itself.
+
+![json-guard-cli-screenshot](docs/json-guard-cli.png)
+
 ## Install
 
-Via Composer
+Installation uses [Composer](getcomposer.org).
+
+### Project Install
 
 ``` bash
 $ composer require yuloh/json-guard-cli
 ```
 
+### Global Install
+
+If you don't want to install this per project, you can install it globally and use it anywhere.  If you aren't familiar with Composer's global install functionality, [this tutorial should get you up and running](https://akrabat.com/global-installation-of-php-tools-with-composer/).
+
+```bash
+$ composer global require yuloh/json-guard-cli
+```
+
 ## Usage
 
-``` php
+### Validate
+
+Validate Data Against a Schema.
+
+Usage:
+
+```bash
+$ json-guard validate [<data>] [<schema>]
+```
+
+Arguments:
+
+* data: The data to validate.  Must be the path to a JSON file or a JSON string.
+* schema: The schema to use.  Must be the path to a JSON file, a JSON string, or a loadable path.
+
+Examples:
+
+```bash
+# Using files
+$ json-guard validate my-data.json my-schema.json
+# Using JSON strings
+$ json-guard validate \
+'{ "id": "https://json-guard.dev/schema#" }' \
+'{ "properties": { "id": { "type": "string", "format": "uri" } } }'
+# Loading Schema with a Loader
+$ json-guard validate my-data.json 'http://json-schema.org/draft-04/schema#'
+```
+
+### Check
+
+Check that a JSON Schema is valid.
+
+Usage:
+
+```bash
+$ json-guard check [<schema>]
+```
+
+Arguments:
+
+* schema: The schema to check.  Must be the path to a JSON file or a JSON string.
+
+Examples:
+
+```bash
+$ json-guard check my-schema.json
 ```
 
 ## Change log
@@ -33,10 +92,6 @@ $ composer test
 ## Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) and [CONDUCT](CONDUCT.md) for details.
-
-## Security
-
-If you discover any security related issues, please email matthew.james.allan@gmail.com instead of using the issue tracker.
 
 ## Credits
 
