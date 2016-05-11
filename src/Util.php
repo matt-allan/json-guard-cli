@@ -15,10 +15,10 @@ class Util
             $error['constraints'] = implode(
                 ',',
                 array_map(function ($k, $v) {
-                    return $k . ':' . JsonGuard\asString($v);
+                    return $k . ':' . JsonGuard\as_string($v);
                 }, array_keys($error['constraints']), $error['constraints'])
             );
-            $error['value'] = JsonGuard\asString($error['value']);
+            $error['value'] = JsonGuard\as_string($error['value']);
             return array_values($error);
         }, $errors);
     }

@@ -23,7 +23,7 @@
     "require": {
         "php" : "~5.5|~7.0",
         "mnapoli/silly": "^1.3",
-        "league/json-guard": "^0.2.1",
+        "league/json-guard": "~0.3",
         "seld/jsonlint": "^1.4"
     },
     "require-dev": {
