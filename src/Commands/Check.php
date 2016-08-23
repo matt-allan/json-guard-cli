@@ -18,7 +18,7 @@ class Check
         }
 
         $metaSchema = (new Dereferencer())
-            ->dereference('http://json-schema.org/draft-04/schema#');
+            ->dereference('file://' . Util::schemaPath('draft4.json'));
         $validator  = new Validator(Util::normalizeJsonArgument($schema), $metaSchema);
 
         if ($validator->passes()) {

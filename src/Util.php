@@ -48,4 +48,9 @@ class Util
     {
         return preg_match('#^[^{\n\r]+\:\/\/[^}\n\r]*#', $path);
     }
+
+    public static function schemaPath($file = '')
+    {
+        return realpath(__DIR__ . '/../schema/' . $file);
+    }
 }
