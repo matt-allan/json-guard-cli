@@ -5,6 +5,9 @@ namespace Yuloh\JsonGuardCli;
 use League\JsonGuard;
 use Seld\JsonLint\JsonParser;
 use Symfony\Component\Console\Helper\Table;
+use League\JsonGuard\Loaders\CurlWebLoader;
+use League\JsonGuard\Loaders\FileGetContentsWebLoader;
+use League\JsonGuard\Loaders\FileLoader;
 
 class Util
 {
@@ -52,5 +55,28 @@ class Util
     public static function schemaPath($file = '')
     {
         return realpath(__DIR__ . '/../schema/' . $file);
+    }
+
+    public static function load($path)
+    {
+        list($prefix, $path) = explode('://', $path, 2);
+
+        switch ($prefix) {
+            case 'http':
+            case 'https':
+                if (function_exists('curl_init')) {
+                    $loader = new CurlWebLoader($prefix . '://');
+                } else {
+                    $loader = new FileGetContentsWebLoader($prefix . '://');
+                }
+                break;
+            case 'file':
+                $loader = new FileLoader();
+                break;
+            default:
+                throw new \RuntimeException(sprintf('No loader registered for the prefix "%s"', $prefix));
+        }
+
+        return $loader->load($path);
     }
 }

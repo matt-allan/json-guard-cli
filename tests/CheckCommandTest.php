@@ -51,17 +51,6 @@ class CheckCommandTest extends \PHPUnit_Framework_TestCase
         $this->assertRegexp($regex, stream_get_contents($stream), $msg);
     }
 
-    public function testCheckWithLoaderPath()
-    {
-        $this->setExpectedException(\InvalidArgumentException::class);
-        $output = new NullOutput();
-        $command = new Check();
-        $command->__invoke(
-            'file://' . __DIR__ . '/fixtures/valid-schema.json',
-            $output
-        );
-    }
-
     public function testCheckWithInvalidJson()
     {
         $this->setExpectedException(ParsingException::class);

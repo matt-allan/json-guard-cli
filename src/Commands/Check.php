@@ -12,14 +12,14 @@ class Check
     public function __invoke($schema, OutputInterface $output)
     {
         if (Util::isLoaderPath($schema)) {
-            throw new \InvalidArgumentException(
-                'Schema can not be loaded from a loader path when performing meta validation.'
-            );
+            $schema = Util::load($schema);
+        } else {
+            $schema = Util::normalizeJsonArgument($schema);
         }
 
         $metaSchema = (new Dereferencer())
             ->dereference('file://' . Util::schemaPath('draft4.json'));
-        $validator  = new Validator(Util::normalizeJsonArgument($schema), $metaSchema);
+        $validator  = new Validator($schema, $metaSchema);
 
         if ($validator->passes()) {
             $output->writeln('<info>✓ Valid draft-04 JSON Schema</info>');
