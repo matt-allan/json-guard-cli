@@ -18,7 +18,7 @@ class Util
                     return $k . ':' . JsonGuard\as_string($v);
                 }, array_keys($error['constraints']), $error['constraints'])
             );
-            $error['value'] = JsonGuard\as_string($error['value']);
+            $error['value'] = is_object($error['value']) || is_array($error['value']) ? json_encode($error['value']) : JsonGuard\as_string($error['value']);
             return array_values($error);
         }, $errors);
     }
