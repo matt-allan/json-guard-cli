@@ -32,6 +32,16 @@ class CheckCommandTest extends \PHPUnit_Framework_TestCase
                 false,
                 'invalid path schema',
             ],
+            [
+                'file://' . realpath(__DIR__ . '/fixtures/valid-schema.json'),
+                true,
+                'valid file loader path schema',
+            ],
+            [
+                'http://json-schema.org/draft-04/schema#',
+                true,
+                'valid web loader path schema',
+            ]
         ];
     }
 
