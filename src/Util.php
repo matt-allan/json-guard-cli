@@ -68,18 +68,18 @@ class Util
 
     public static function truncate($string, $limit = 100)
     {
-       if (strlen($string) <= $limit) {
-           return $string;
-       }
+        if (strlen($string) <= $limit) {
+            return $string;
+        }
 
-       return substr($string, 0, $limit) . '...';
+        return substr($string, 0, $limit) . '...';
     }
 
     public static function getStdin()
     {
         $json = '';
-        $fh   = fopen('php://stdin','r');
-        while($line = fgets($fh)) {
+        $fh   = fopen('php://stdin', 'r');
+        while ($line = fgets($fh)) {
             $json .= $line;
         }
         return $json;
