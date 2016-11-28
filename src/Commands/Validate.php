@@ -11,19 +11,11 @@ class Validate
 {
     public function __invoke($data, $schema, OutputInterface $output)
     {
-        // If it's a loader path we don't normalize it.
-        if (!Util::isLoaderPath($schema)) {
-            $schema = Util::normalizeJsonArgument($schema);
-        }
-
-        if (Util::isLoaderPath($data)) {
-            throw new \InvalidArgumentException(
-                'Data can not be loaded from a loader path.'
-            );
-        }
+        $schema = Util::loadJson($schema);
+        $data   = Util::loadJson($data);
 
         $schema    = (new Dereferencer())->dereference($schema);
-        $validator = new Validator(Util::normalizeJsonArgument($data), $schema);
+        $validator = new Validator($data, $schema);
 
         if ($validator->passes()) {
             $output->writeln('<info>✓ Validation passed</info>');

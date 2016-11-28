@@ -43,8 +43,8 @@ $ json-guard validate [<data>] [<schema>]
 
 Arguments:
 
-* data: The data to validate.  Must be the path to a JSON file or a JSON string.
-* schema: The schema to use.  Must be the path to a JSON file, a JSON string, or a loadable path.
+* data: The data to validate.
+* schema: The schema to use.
 
 Examples:
 
@@ -71,13 +71,17 @@ $ json-guard check [<schema>]
 
 Arguments:
 
-* schema: The schema to check.  Must be the path to a JSON file or a JSON string.
+* schema: The schema to check.
 
 Examples:
 
 ```bash
 $ json-guard check my-schema.json
 ```
+
+### Loading JSON
+
+All commands can load the JSON as a string, from a loader path, from a local file path, or from STDIN.
 
 ## Change log
 

@@ -42,6 +42,12 @@ class ValidateCommandTest extends \PHPUnit_Framework_TestCase
                 true,
                 'valid path data, valid loader path schema'
             ],
+            [
+                'file://' . __DIR__ . '/fixtures/valid-data.json',
+                'file://' . __DIR__ . '/fixtures/valid-schema.json',
+                true,
+                'valid loader path data, valid loader path schema'
+            ]
         ];
     }
 
@@ -59,18 +65,6 @@ class ValidateCommandTest extends \PHPUnit_Framework_TestCase
         rewind($stream);
         $regex = $isValid ? '/✓ Validation passed/' : '/✗ Validation failed/';
         $this->assertRegexp($regex, stream_get_contents($stream), $msg);
-    }
-
-    public function testValidateWithLoaderPathForData()
-    {
-        $this->setExpectedException(\InvalidArgumentException::class);
-        $output = new NullOutput();
-        $command = new Validate();
-        $command->__invoke(
-            'file://' . __DIR__ . '/fixtures/valid-data.json',
-            __DIR__ . '/fixtures/valid-schema.json',
-            $output
-        );
     }
 
     public function testValidateWithInvalidJson()

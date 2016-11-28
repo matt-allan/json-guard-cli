@@ -3,37 +3,33 @@
 namespace Yuloh\JsonGuardCli;
 
 use League\JsonGuard;
+use League\JsonGuard\ValidationError;
 use Seld\JsonLint\JsonParser;
 use Symfony\Component\Console\Helper\Table;
-use League\JsonGuard\Loaders\CurlWebLoader;
-use League\JsonGuard\Loaders\FileGetContentsWebLoader;
-use League\JsonGuard\Loaders\FileLoader;
 
 class Util
 {
     public static function printableErrors(array $errors)
     {
-        return array_map(function ($error) {
-            $error = $error->toArray();
-            $error['constraints'] = implode(
-                ',',
-                array_map(function ($k, $v) {
-                    return $k . ':' . JsonGuard\as_string($v);
-                }, array_keys($error['constraints']), $error['constraints'])
-            );
-            if (is_array($error['value']) || is_object($error['value'])) {
-                $error['value'] = json_encode($error['value']);
-            } else {
-                $error['value'] = JsonGuard\as_string($error['value']);
-            }
-            return array_values($error);
+        return array_map(function (ValidationError $error) {
+            return [
+                $error->getKeyword(),
+                $error->getMessage(),
+                $error->getPointer(),
+                static::truncate(json_encode($error->getValue())),
+            ];
         }, $errors);
     }
 
-    public static function normalizeJsonArgument($json)
+    public static function loadJson($json)
     {
-        if (file_exists($json)) {
+        // If it's a loader path just load it since we can't lint that.
+        if (static::isLoaderPath($json)) {
+            return static::loadPath($json);
+        } elseif (file_exists($json)) {
             $json = file_get_contents($json);
+        } elseif ($json === '-') {
+            $json = static::getStdin();
         }
 
         if ($parseException = (new JsonParser())->lint($json)) {
@@ -46,7 +42,7 @@ class Util
     public static function renderErrorTable($output, $errors)
     {
         (new Table($output))
-            ->setHeaders(['Code', 'Message', 'Pointer', 'Value', 'Constraints'])
+            ->setHeaders(['Keyword', 'Message', 'Pointer', 'Value'])
             ->setRows(static::printableErrors($errors))
             ->render();
     }
@@ -61,26 +57,31 @@ class Util
         return realpath(__DIR__ . '/../schema/' . $file);
     }
 
-    public static function load($path)
+    public static function loadPath($path)
     {
         list($prefix, $path) = explode('://', $path, 2);
 
-        switch ($prefix) {
-            case 'http':
-            case 'https':
-                if (function_exists('curl_init')) {
-                    $loader = new CurlWebLoader($prefix . '://');
-                } else {
-                    $loader = new FileGetContentsWebLoader($prefix . '://');
-                }
-                break;
-            case 'file':
-                $loader = new FileLoader();
-                break;
-            default:
-                throw new \RuntimeException(sprintf('No loader registered for the prefix "%s"', $prefix));
-        }
+        $loader = (new JsonGuard\Dereferencer())->getLoader($prefix);
 
         return $loader->load($path);
+    }
+
+    public static function truncate($string, $limit = 100)
+    {
+       if (strlen($string) <= $limit) {
+           return $string;
+       }
+
+       return substr($string, 0, $limit) . '...';
+    }
+
+    public static function getStdin()
+    {
+        $json = '';
+        $fh   = fopen('php://stdin','r');
+        while($line = fgets($fh)) {
+            $json .= $line;
+        }
+        return $json;
     }
 }

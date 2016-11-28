@@ -11,11 +11,7 @@ class Check
 {
     public function __invoke($schema, OutputInterface $output)
     {
-        if (Util::isLoaderPath($schema)) {
-            $schema = Util::load($schema);
-        } else {
-            $schema = Util::normalizeJsonArgument($schema);
-        }
+        $schema = Util::loadJson($schema);
 
         $metaSchema = (new Dereferencer())
             ->dereference('file://' . Util::schemaPath('draft4.json'));

@@ -10,7 +10,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 }
 
 use Silly\Application;
-use Yuloh\JsonGuardCli\Commmands;
+use Yuloh\JsonGuardCli\Commands;
 
 $app = new Application('JSON Guard CLI', '0.0.1');
 
@@ -19,8 +19,8 @@ $app
     ->descriptions(
         'Validate JSON data against a schema',
         [
-            'data' => 'The data to validate.  Must be the path to a JSON file or a JSON string.',
-            'schema' => 'The schema to use.  Must be the path to a JSON file, a JSON string, or a loadable path.'
+            'data' => 'The data to validate.',
+            'schema' => 'The schema to use.'
         ]
     );
 
@@ -29,7 +29,7 @@ $app
     ->descriptions(
         'Check that a JSON Schema is valid.',
         [
-            'schema' => 'The schema to check.  Must be the path to a JSON file or a JSON string.'
+            'schema' => 'The schema to check.'
         ]
     );
 
