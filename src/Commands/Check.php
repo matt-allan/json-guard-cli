@@ -19,9 +19,11 @@ class Check
 
         if ($validator->passes()) {
             $output->writeln('<info>✓ Valid draft-04 JSON Schema</info>');
+            return 0;
         } else {
             $output->writeln('<error>✗ Invalid draft-04 JSON Schema</error>');
             Util::renderErrorTable($output, $validator->errors());
+            return 1;
         }
     }
 }

@@ -19,9 +19,11 @@ class Validate
 
         if ($validator->passes()) {
             $output->writeln('<info>✓ Validation passed</info>');
+            return 0;
         } else {
             $output->writeln('<error>✗ Validation failed</error>');
             Util::renderErrorTable($output, $validator->errors());
+            return 1;
         }
     }
 }
