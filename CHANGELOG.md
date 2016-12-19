@@ -4,7 +4,7 @@ All Notable changes to `json-guard-cli` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## 0.2.0 - 2016-11-28
+## 0.2.0 - 2016-12-19
 
 ### Changed
 
