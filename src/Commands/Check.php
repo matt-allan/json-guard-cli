@@ -2,7 +2,7 @@
 
 namespace Yuloh\JsonGuardCli\Commands;
 
-use League\JsonGuard\Dereferencer;
+use League\JsonReference\Dereferencer;
 use League\JsonGuard\Validator;
 use Symfony\Component\Console\Output\OutputInterface;
 use Yuloh\JsonGuardCli\Util;
@@ -13,7 +13,7 @@ class Check
     {
         $schema = Util::loadJson($schema);
 
-        $metaSchema = (new Dereferencer())
+        $metaSchema = Dereferencer::draft4()
             ->dereference('file://' . Util::schemaPath('draft4.json'));
         $validator  = new Validator($schema, $metaSchema);
 

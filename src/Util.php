@@ -2,8 +2,8 @@
 
 namespace Yuloh\JsonGuardCli;
 
-use League\JsonGuard;
 use League\JsonGuard\ValidationError;
+use League\JsonReference\Dereferencer;
 use Seld\JsonLint\JsonParser;
 use Symfony\Component\Console\Helper\Table;
 
@@ -12,11 +12,12 @@ class Util
     public static function printableErrors(array $errors)
     {
         return array_map(function (ValidationError $error) {
+            $context = $error->getContext();
             return [
-                $error->getKeyword(),
-                $error->getMessage(),
-                $error->getPointer(),
-                static::truncate(json_encode($error->getValue())),
+                ValidationError::MESSAGE     => $error->getMessage(),
+                ValidationError::SCHEMA_PATH => $context[ValidationError::SCHEMA_PATH],
+                ValidationError::DATA_PATH   => $context[ValidationError::DATA_PATH],
+                ValidationError::CAUSE       => $context[ValidationError::CAUSE],
             ];
         }, $errors);
     }
@@ -36,13 +37,18 @@ class Util
             throw $parseException;
         }
 
-        return JsonGuard\json_decode($json, false, 512, JSON_BIGINT_AS_STRING);
+        return json_decode($json, false, 512, JSON_BIGINT_AS_STRING);
     }
 
     public static function renderErrorTable($output, $errors)
     {
         (new Table($output))
-            ->setHeaders(['Keyword', 'Message', 'Pointer', 'Value'])
+            ->setHeaders([
+                'Message',
+                'Schema Path',
+                'Data Path',
+                'Cause',
+            ])
             ->setRows(static::printableErrors($errors))
             ->render();
     }
@@ -61,18 +67,11 @@ class Util
     {
         list($prefix, $path) = explode('://', $path, 2);
 
-        $loader = (new JsonGuard\Dereferencer())->getLoader($prefix);
+        $loader = Dereferencer::draft4()
+            ->getLoaderManager()
+            ->getLoader($prefix);
 
         return $loader->load($path);
-    }
-
-    public static function truncate($string, $limit = 100)
-    {
-        if (strlen($string) <= $limit) {
-            return $string;
-        }
-
-        return substr($string, 0, $limit) . '...';
     }
 
     public static function getStdin()
